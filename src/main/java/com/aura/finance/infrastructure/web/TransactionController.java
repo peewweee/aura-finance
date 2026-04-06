@@ -1,23 +1,22 @@
 package com.aura.finance.infrastructure.web;
 
 import com.aura.finance.application.port.in.CreateTransactionUseCase;
+import com.aura.finance.application.port.in.GetTransactionByIdUseCase;
 import com.aura.finance.application.port.in.ListTransactionsUseCase;
 import com.aura.finance.domain.model.Transaction;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PastOrPresent;
-import jakarta.validation.constraints.Size;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.math.BigDecimal;
+import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -27,13 +26,16 @@ import java.util.UUID;
 public class TransactionController {
 
     private final CreateTransactionUseCase createTransactionUseCase;
+    private final GetTransactionByIdUseCase getTransactionByIdUseCase;
     private final ListTransactionsUseCase listTransactionsUseCase;
 
     public TransactionController(
             CreateTransactionUseCase createTransactionUseCase,
+            GetTransactionByIdUseCase getTransactionByIdUseCase,
             ListTransactionsUseCase listTransactionsUseCase
     ) {
         this.createTransactionUseCase = createTransactionUseCase;
+        this.getTransactionByIdUseCase = getTransactionByIdUseCase;
         this.listTransactionsUseCase = listTransactionsUseCase;
     }
 
@@ -49,56 +51,40 @@ public class TransactionController {
                 )
         );
 
-        TransactionResponse response = new TransactionResponse(
-            transaction.id(),
-            transaction.description(),
-            transaction.amount(),
-            transaction.category(),
-            transaction.transactionDate()
-        );
+        TransactionResponse response = toResponse(transaction);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{transactionId}")
+                .buildAndExpand(transaction.id())
+                .toUri();
+
+        return ResponseEntity.created(location).body(response);
     }
 
     @GetMapping
     public List<TransactionResponse> listTransactions() {
         return listTransactionsUseCase.listTransactions()
                 .stream()
-                .map(transaction -> new TransactionResponse(
-                        transaction.id(),
-                        transaction.description(),
-                        transaction.amount(),
-                        transaction.category(),
-                        transaction.transactionDate()
-                ))
+                .map(this::toResponse)
                 .toList();
     }
 
-    public record CreateTransactionRequest(
-            @NotBlank
-            @Size(max = 255)
-            String description,
-
-            @NotNull
-            @DecimalMin(value = "0.01")
-            BigDecimal amount,
-
-            @NotBlank
-            @Size(max = 100)
-            String category,
-
-            @NotNull
-            @PastOrPresent
-            LocalDate transactionDate
-    ) {
+    @GetMapping("/{transactionId}")
+    public ResponseEntity<TransactionResponse> getTransactionById(@PathVariable UUID transactionId) {
+        return getTransactionByIdUseCase.getTransactionById(transactionId)
+                .map(this::toResponse)
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    public record TransactionResponse(
-            UUID id,
-            String description,
-            BigDecimal amount,
-            String category,
-            LocalDate transactionDate
-    ) {
+    private TransactionResponse toResponse(Transaction transaction) {
+        return new TransactionResponse(
+                transaction.id(),
+                transaction.description(),
+                transaction.amount(),
+                transaction.category(),
+                transaction.transactionDate()
+        );
     }
 }

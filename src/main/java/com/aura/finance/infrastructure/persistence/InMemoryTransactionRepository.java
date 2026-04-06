@@ -5,6 +5,7 @@ import com.aura.finance.domain.model.Transaction;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,5 +22,10 @@ public class InMemoryTransactionRepository implements TransactionRepository {
     @Override
     public List<Transaction> findAll() {
         return storage.values().stream().toList();
+    }
+
+    @Override
+    public Optional<Transaction> findById(UUID transactionId) {
+        return Optional.ofNullable(storage.get(transactionId));
     }
 }
