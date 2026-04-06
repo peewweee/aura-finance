@@ -9,6 +9,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -36,7 +38,7 @@ public class TransactionController {
     }
 
     @PostMapping
-    public TransactionResponse createTransaction(@Valid @RequestBody CreateTransactionRequest request) {
+    public ResponseEntity<TransactionResponse> createTransaction(@Valid @RequestBody CreateTransactionRequest request) {
         Transaction transaction = createTransactionUseCase.createTransaction(
                 new CreateTransactionUseCase.CreateTransactionCommand(
                         null,
@@ -47,13 +49,15 @@ public class TransactionController {
                 )
         );
 
-        return new TransactionResponse(
-                transaction.id(),
-                transaction.description(),
-                transaction.amount(),
-                transaction.category(),
-                transaction.transactionDate()
+        TransactionResponse response = new TransactionResponse(
+            transaction.id(),
+            transaction.description(),
+            transaction.amount(),
+            transaction.category(),
+            transaction.transactionDate()
         );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
