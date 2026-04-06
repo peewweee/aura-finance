@@ -4,6 +4,8 @@ import com.aura.finance.application.port.out.TransactionRepository;
 import com.aura.finance.domain.model.Transaction;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class JpaTransactionRepositoryAdapter implements TransactionRepository {
 
@@ -33,6 +35,12 @@ public class JpaTransactionRepositoryAdapter implements TransactionRepository {
                 .stream()
                 .map(this::toDomain)
                 .toList();
+    }
+
+    @Override
+    public Optional<Transaction> findById(UUID transactionId) {
+        return springDataTransactionRepository.findById(transactionId)
+                .map(this::toDomain);
     }
 
     private Transaction toDomain(TransactionJpaEntity entity) {
