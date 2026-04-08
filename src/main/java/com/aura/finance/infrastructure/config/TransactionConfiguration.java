@@ -1,11 +1,13 @@
 package com.aura.finance.infrastructure.config;
 
 import com.aura.finance.application.port.in.CreateTransactionUseCase;
+import com.aura.finance.application.port.in.ConfirmExtractedTransactionsUseCase;
 import com.aura.finance.application.port.in.ExtractTransactionsUseCase;
 import com.aura.finance.application.port.in.GetTransactionByIdUseCase;
 import com.aura.finance.application.port.in.ListTransactionsUseCase;
 import com.aura.finance.application.port.out.TransactionExtractor;
 import com.aura.finance.application.port.out.TransactionRepository;
+import com.aura.finance.application.service.ConfirmExtractedTransactionsService;
 import com.aura.finance.application.service.CreateTransactionService;
 import com.aura.finance.application.service.ExtractTransactionsService;
 import com.aura.finance.application.service.GetTransactionByIdService;
@@ -53,5 +55,12 @@ public class TransactionConfiguration {
     @Bean
     public ExtractTransactionsUseCase extractTransactionsUseCase(TransactionExtractor transactionExtractor) {
         return new ExtractTransactionsService(transactionExtractor);
+    }
+
+    @Bean
+    public ConfirmExtractedTransactionsUseCase confirmExtractedTransactionsUseCase(
+            TransactionRepository transactionRepository
+    ) {
+        return new ConfirmExtractedTransactionsService(transactionRepository);
     }
 }
