@@ -1,0 +1,122 @@
+[
+  {
+    "description": "Groceries",
+    "amount": 1850.00,
+    "category": "GROCERIES",
+    "transactionDate": "2026-03-03"
+  },
+  {
+    "description": "Coffee",
+    "amount": 150.00,
+    "category": "FOOD",
+    "transactionDate": "2026-03-03"
+  },
+  {
+    "description": "Jeep fare",
+    "amount": 13.00,
+    "category": "TRANSPORT",
+    "transactionDate": "2026-03-03"
+  },
+  {
+    "description": "Electric bill",
+    "amount": 2300.00,
+    "category": "UTILITIES",
+    "transactionDate": "2026-03-05"
+  },
+  {
+    "description": "Internet bill",
+    "amount": 1699.00,
+    "category": "UTILITIES",
+    "transactionDate": "2026-03-06"
+  },
+  {
+    "description": "Lunch",
+    "amount": 220.00,
+    "category": "FOOD",
+    "transactionDate": "2026-03-07"
+  },
+  {
+    "description": "Grab ride",
+    "amount": 289.00,
+    "category": "TRANSPORT",
+    "transactionDate": "2026-03-07"
+  },
+  {
+    "description": "Medicine",
+    "amount": 540.00,
+    "category": "HEALTH",
+    "transactionDate": "2026-03-09"
+  },
+  {
+    "description": "Groceries",
+    "amount": 2100.00,
+    "category": "GROCERIES",
+    "transactionDate": "2026-03-10"
+  },
+  {
+    "description": "Milk tea",
+    "amount": 120.00,
+    "category": "FOOD",
+    "transactionDate": "2026-03-11"
+  },
+  {
+    "description": "Phone load",
+    "amount": 300.00,
+    "category": "UTILITIES",
+    "transactionDate": "2026-03-12"
+  },
+  {
+    "description": "Tuition payment",
+    "amount": 8000.00,
+    "category": "EDUCATION",
+    "transactionDate": "2026-03-15"
+  },
+  {
+    "description": "Shopee purchase",
+    "amount": 1450.00,
+    "category": "SHOPPING",
+    "transactionDate": "2026-03-16"
+  },
+  {
+    "description": "Emergency fund deposit",
+    "amount": 5000.00,
+    "category": "SAVINGS",
+    "transactionDate": "2026-03-18"
+  },
+  {
+    "description": "Dinner",
+    "amount": 340.00,
+    "category": "FOOD",
+    "transactionDate": "2026-03-19"
+  },
+  {
+    "description": "Bus fare",
+    "amount": 35.00,
+    "category": "TRANSPORT",
+    "transactionDate": "2026-03-19"
+  },
+  {
+    "description": "Movie ticket",
+    "amount": 420.00,
+    "category": "ENTERTAINMENT",
+    "transactionDate": "2026-03-21"
+  },
+  {
+    "description": "Groceries",
+    "amount": 1980.00,
+    "category": "GROCERIES",
+    "transactionDate": "2026-03-24"
+  },
+  {
+    "description": "Water bill",
+    "amount": 480.00,
+    "category": "UTILITIES",
+    "transactionDate": "2026-03-25"
+  },
+  {
+    "description": "Coffee",
+    "amount": 160.00,
+    "category": "FOOD",
+    "transactionDate": "2026-03-27"
+  }
+]
