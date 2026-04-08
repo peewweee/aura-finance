@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Finance</title>
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="page-shell">
+    <header class="hero">
+        <div class="hero-copy">
+            <p class="eyebrow">Aura</p>
+            <h1>Your money, explained clearly.</h1>
+            <p class="hero-text">
+                Log expenses in plain English, understand where your money goes, and make better decisions before you spend.
+            </p>
+        </div>
+    </header>
+
+    <main class="dashboard-grid">
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-kicker">Quick Log</p>
+                    <h2>Quick Log</h2>
+                    <p class="panel-note">Tell Aura what you bought today in plain English.</p>
+                </div>
+            </div>
+
+            <form id="extract-form" class="stack">
+                <label class="field">
+                    <span>What did you buy?</span>
+                    <textarea id="raw-text" rows="5" placeholder="Bought groceries for 1850, coffee for 150, and paid jeep fare 13 today."></textarea>
+                </label>
+                <div class="field-row">
+                    <label class="field">
+                        <span>Reference date</span>
+                        <input id="reference-date" type="date">
+                    </label>
+                    <div class="inline-actions">
+                        <button type="submit" class="button button-primary">Check My Entries</button>
+                        <button id="confirm-selected-btn" type="button" class="button button-secondary" disabled>Save Selected</button>
+                    </div>
+                </div>
+            </form>
+
+            <div id="extract-status" class="status"></div>
+            <div id="extracted-list" class="draft-list empty-state">No extracted transactions yet.</div>
+            <div class="subsection">
+                <div class="subsection-header">
+                    <h3>Saved Entries</h3>
+                    <button id="refresh-transactions-inline-btn" class="button button-ghost">Refresh</button>
+                </div>
+                <div id="transactions-status" class="status"></div>
+                <div id="transactions-list" class="table-shell empty-state">No saved transactions loaded yet.</div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-kicker">My Spending Report</p>
+                    <h2>My Spending Report</h2>
+                    <p class="panel-note">See where your money went this month.</p>
+                </div>
+            </div>
+
+            <form id="analysis-form" class="stack">
+                <div class="field-row">
+                    <label class="field">
+                        <span>Start date</span>
+                        <input id="analysis-start" type="date">
+                    </label>
+                    <label class="field">
+                        <span>Until</span>
+                        <input id="analysis-end" type="date">
+                    </label>
+                </div>
+                <button type="submit" class="button button-primary">Show My Report</button>
+            </form>
+
+            <div id="analysis-status" class="status"></div>
+            <div id="analysis-result" class="result-card muted">
+                Run a spending analysis to see category breakdowns and AI insights.
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-kicker">The Cost of Spending</p>
+                    <h2>The Cost of Spending</h2>
+                    <p class="panel-note">See how much this purchase costs you in future savings.</p>
+                </div>
+            </div>
+
+            <form id="simulation-form" class="stack">
+                <div class="field-row">
+                    <label class="field">
+                        <span>How much does it cost?</span>
+                        <input id="simulation-amount" type="number" step="0.01" min="0.01" value="50000">
+                    </label>
+                    <label class="field">
+                        <span>Expected monthly growth</span>
+                        <input id="simulation-rate" type="number" step="0.0001" min="0" value="0.01">
+                    </label>
+                </div>
+                <label class="field">
+                    <span>How many months ahead?</span>
+                    <input id="simulation-months" type="number" min="1" value="36">
+                </label>
+                <button type="submit" class="button button-primary">Show Future Cost</button>
+            </form>
+
+            <div id="simulation-status" class="status"></div>
+            <div id="simulation-result" class="result-card muted">
+                Enter a purchase amount to estimate its long-term opportunity cost.
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <div>
+                    <p class="panel-kicker">Aura's Advice</p>
+                    <h2>Aura's Advice</h2>
+                    <p class="panel-note">Get a personalized strategy based on your habits and goals.</p>
+                </div>
+            </div>
+
+            <form id="strategy-form" class="stack">
+                <div class="field-row">
+                    <label class="field">
+                        <span>Start date</span>
+                        <input id="strategy-start" type="date">
+                    </label>
+                    <label class="field">
+                        <span>Until</span>
+                        <input id="strategy-end" type="date">
+                    </label>
+                </div>
+                <div class="field-row strategy-row">
+                    <label class="field">
+                        <span>Planned purchase</span>
+                        <input id="strategy-amount" type="number" step="0.01" min="0.01" placeholder="50000">
+                    </label>
+                    <label class="field">
+                        <span>Expected monthly growth</span>
+                        <input id="strategy-rate" type="number" step="0.0001" min="0" placeholder="0.01">
+                    </label>
+                    <label class="field">
+                        <span>Months ahead</span>
+                        <input id="strategy-months" type="number" min="1" placeholder="36">
+                    </label>
+                </div>
+                <button type="submit" class="button button-primary">Ask Aura</button>
+            </form>
+
+            <div id="strategy-status" class="status"></div>
+            <div id="strategy-result" class="result-card muted">
+                Combine spending behavior and purchase simulation to generate AI strategy guidance.
+            </div>
+        </section>
+    </main>
+</div>
+
+<script src="/app.js"></script>
+</body>
+</html>
