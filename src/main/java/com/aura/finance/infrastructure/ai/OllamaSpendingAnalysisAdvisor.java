@@ -74,7 +74,10 @@ public class OllamaSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
                 - No extra explanation outside JSON.
                 - Keep insights practical and specific.
                 - Mention the largest spending category if possible.
-                - If there is very little data, say so clearly.
+                - Even with a small dataset, still provide useful observations from the available numbers.
+                - Only say data is insufficient when transactionCount is exactly 0.
+                - If there are 1 or more transactions, identify the top spending category and compare it with the others.
+                - Recommendations should be concrete and action-oriented, not generic.
 
                 Input:
                 startDate: %s
@@ -82,6 +85,19 @@ public class OllamaSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
                 transactionCount: %d
                 totalSpent: %s
                 spendingByCategory: %s
+                
+                Example valid response:
+                {
+                  "summary": "You spent most of your money on groceries in this period.",
+                  "insights": [
+                    "Groceries dominate your spending compared with other categories.",
+                    "Food and transport are relatively small compared with groceries."
+                  ],
+                  "recommendations": [
+                    "Review grocery spending and check if any items can be planned more efficiently.",
+                    "Track whether this grocery-heavy pattern repeats next week or next month."
+                  ]
+                }
                 """.formatted(
                 request.startDate(),
                 request.endDate(),
@@ -131,8 +147,15 @@ public class OllamaSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
             return "No transactions were found in the selected date range.";
         }
 
-        return "You recorded %d transactions and spent a total of %s from %s to %s."
-                .formatted(request.transactionCount(), request.totalSpent(), request.startDate(), request.endDate());
+        String topCategory = request.spendingByCategory()
+                .entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse("OTHER");
+
+        return "You recorded %d transactions and spent a total of %s from %s to %s, with %s as your largest category."
+                .formatted(request.transactionCount(), request.totalSpent(), request.startDate(), request.endDate(), topCategory);
     }
 
     private List<String> buildFallbackInsights(SpendingAnalysisRequest request) {
@@ -147,9 +170,12 @@ public class OllamaSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
                 .map(Map.Entry::getKey)
                 .orElse("OTHER");
 
+        BigDecimal topCategoryAmount = request.spendingByCategory()
+                .getOrDefault(topCategory, BigDecimal.ZERO);
+
         return List.of(
-                "Your largest spending category in this period is %s.".formatted(topCategory),
-                "You spent a total of %s across %d transactions.".formatted(request.totalSpent(), request.transactionCount())
+                "%s is your largest spending category at %s.".formatted(topCategory, topCategoryAmount),
+                "You spent a total of %s across %d transactions in this date range.".formatted(request.totalSpent(), request.transactionCount())
         );
     }
 
@@ -166,7 +192,7 @@ public class OllamaSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
 
         return List.of(
                 "Review the category where you spent %s the most and decide if part of it can be reduced.".formatted(topCategoryAmount),
-                "Track this same date range again next week or next month to compare changes."
+                "Use this result as a baseline and compare the same categories again in your next tracking period."
         );
     }
 }
