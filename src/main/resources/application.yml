@@ -17,3 +17,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+aura:
+  ai:
+    ollama:
+      base-url: http://localhost:11434
+      model-name: llama3.2

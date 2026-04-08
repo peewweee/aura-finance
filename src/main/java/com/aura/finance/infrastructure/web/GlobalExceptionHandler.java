@@ -1,5 +1,6 @@
 package com.aura.finance.infrastructure.web;
 
+import com.aura.finance.infrastructure.ai.AiIntegrationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -29,11 +30,28 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(AiIntegrationException.class)
+    @ResponseStatus(HttpStatus.BAD_GATEWAY)
+    public ApiErrorResponse handleAiIntegrationException(AiIntegrationException exception) {
+        return new ApiErrorResponse(
+                Instant.now(),
+                HttpStatus.BAD_GATEWAY.value(),
+                exception.getMessage()
+        );
+    }
+
     public record ValidationErrorResponse(
             Instant timestamp,
             int status,
             String message,
             List<FieldValidationError> errors
+    ) {
+    }
+
+    public record ApiErrorResponse(
+            Instant timestamp,
+            int status,
+            String message
     ) {
     }
 

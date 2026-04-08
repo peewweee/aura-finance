@@ -10,9 +10,11 @@ import com.aura.finance.application.service.CreateTransactionService;
 import com.aura.finance.application.service.ExtractTransactionsService;
 import com.aura.finance.application.service.GetTransactionByIdService;
 import com.aura.finance.application.service.TransactionQueryService;
-import com.aura.finance.infrastructure.ai.FakeTransactionExtractor;
+import com.aura.finance.infrastructure.ai.OllamaTransactionExtractor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.aura.finance.infrastructure.persistence.JpaTransactionRepositoryAdapter;
 import com.aura.finance.infrastructure.persistence.SpringDataTransactionRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -40,8 +42,12 @@ public class TransactionConfiguration {
     }
 
     @Bean
-    public TransactionExtractor transactionExtractor() {
-        return new FakeTransactionExtractor();
+    public TransactionExtractor transactionExtractor(
+            ObjectMapper objectMapper,
+            @Value("${aura.ai.ollama.base-url}") String baseUrl,
+            @Value("${aura.ai.ollama.model-name}") String modelName
+    ) {
+        return new OllamaTransactionExtractor(baseUrl, modelName, objectMapper);
     }
 
     @Bean
