@@ -4,7 +4,6 @@ const state = {
 
 const extractForm = document.getElementById("extract-form");
 const rawTextInput = document.getElementById("raw-text");
-const referenceDateInput = document.getElementById("reference-date");
 const extractStatus = document.getElementById("extract-status");
 const extractedList = document.getElementById("extracted-list");
 const confirmSelectedBtn = document.getElementById("confirm-selected-btn");
@@ -31,7 +30,7 @@ extractForm.addEventListener("submit", async (event) => {
     try {
         const response = await postJson("/transaction-extraction", {
             rawText: rawTextInput.value.trim(),
-            referenceDate: referenceDateInput.value
+            referenceDate: todayString()
         });
 
         state.extractedTransactions = response.map((transaction) => ({
@@ -411,7 +410,6 @@ function integerValue(id) {
 }
 
 function setDefaultDates() {
-    referenceDateInput.value = todayString();
     const now = new Date();
     const start = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
     const end = now.toISOString().slice(0, 10);

@@ -4,40 +4,51 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aura Finance</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Code:wght@400;500;600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
+
+<div class="star-field" id="star-field" aria-hidden="true"></div>
+
 <div class="page-shell">
+
+    <div class="ai-observer" aria-hidden="true">
+        <div class="octahedron-wrap">
+            <div class="observer-ring"></div>
+        </div>
+    </div>
+
     <header class="hero">
         <div class="hero-copy">
             <p class="eyebrow">Aura</p>
-            <h1>Your money, explained clearly.</h1>
+            <h1>Your money,<br>explained clearly.</h1>
             <p class="hero-text">
-                Log expenses in plain English, understand where your money goes, and make better decisions before you spend.
+                Log expenses quickly, understand where your money goes, and make better decisions before you spend.
             </p>
         </div>
     </header>
 
     <main class="dashboard-grid">
+
         <section class="panel">
             <div class="panel-header">
                 <div>
                     <p class="panel-kicker">Quick Log</p>
                     <h2>Quick Log</h2>
-                    <p class="panel-note">Tell Aura what you bought today in plain English.</p>
+                    <p class="panel-note">Tell Aura what you bought today.</p>
                 </div>
             </div>
 
             <form id="extract-form" class="stack">
+                <input id="reference-date" type="hidden">
                 <label class="field">
                     <span>What did you buy?</span>
-                    <textarea id="raw-text" rows="5" placeholder="Bought groceries for 1850, coffee for 150, and paid jeep fare 13 today."></textarea>
+                    <textarea id="raw-text" rows="5" placeholder="Groceries 1850, kape 150, at jeep 13 today."></textarea>
                 </label>
                 <div class="field-row">
-                    <label class="field">
-                        <span>Reference date</span>
-                        <input id="reference-date" type="date">
-                    </label>
                     <div class="inline-actions">
                         <button type="submit" class="button button-primary">Check My Entries</button>
                         <button id="confirm-selected-btn" type="button" class="button button-secondary" disabled>Save Selected</button>
@@ -47,6 +58,7 @@
 
             <div id="extract-status" class="status"></div>
             <div id="extracted-list" class="draft-list empty-state">No extracted transactions yet.</div>
+
             <div class="subsection">
                 <div class="subsection-header">
                     <h3>Saved Entries</h3>
@@ -161,8 +173,54 @@
                 Combine spending behavior and purchase simulation to generate AI strategy guidance.
             </div>
         </section>
+
     </main>
 </div>
+
+<script>
+(function () {
+    const field  = document.getElementById('star-field');
+    const COUNT  = 180;
+
+    for (let i = 0; i < COUNT; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size    = Math.random() * 2.2 + 0.4;
+        const opacity = Math.random() * 0.55 + 0.15;
+        star.style.cssText = [
+            `width:${size}px`,
+            `height:${size}px`,
+            `top:${Math.random() * 100}%`,
+            `left:${Math.random() * 100}%`,
+            `--star-opacity:${opacity.toFixed(2)}`,
+            `--twinkle-dur:${(Math.random() * 4 + 2).toFixed(1)}s`,
+            `--twinkle-delay:${(Math.random() * 6).toFixed(1)}s`,
+        ].join(';');
+        field.appendChild(star);
+    }
+
+    const simForm = document.getElementById('simulation-form');
+    simForm && simForm.addEventListener('submit', () => {
+        setTimeout(() => {
+            const vals = document.querySelectorAll('#simulation-result .metric-value');
+            vals.forEach(v => {
+                v.classList.remove('glitch-text');
+                void v.offsetWidth;
+                v.classList.add('glitch-text');
+            });
+        }, 400);
+    });
+
+    const confirmBtn = document.getElementById('confirm-selected-btn');
+    confirmBtn && confirmBtn.addEventListener('click', () => {
+        document.querySelectorAll('.draft-item').forEach((item, i) => {
+            setTimeout(() => item.classList.add('vanish'), i * 60);
+        });
+    });
+
+    const originalSetStatus = window.__setStatus;
+})();
+</script>
 
 <script src="/app.js"></script>
 </body>
