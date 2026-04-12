@@ -27,6 +27,9 @@ import com.aura.finance.infrastructure.ai.GeminiSpendingAnalysisAdvisor;
 import com.aura.finance.infrastructure.ai.GeminiTransactionExtractor;
 import com.aura.finance.infrastructure.ai.NoOpAiResponseCache;
 import com.aura.finance.infrastructure.ai.RedisAiResponseCache;
+import com.aura.finance.infrastructure.ai.UnavailableFinancialStrategyExplainer;
+import com.aura.finance.infrastructure.ai.UnavailableSpendingAnalysisAdvisor;
+import com.aura.finance.infrastructure.ai.UnavailableTransactionExtractor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.aura.finance.infrastructure.persistence.JpaTransactionRepositoryAdapter;
 import com.aura.finance.infrastructure.persistence.SpringDataTransactionRepository;
@@ -40,6 +43,9 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Configuration
 public class TransactionConfiguration {
+
+    private static final String AI_UNAVAILABLE_MESSAGE =
+            "AI features are unavailable because AURA_AI_GEMINI_API_KEY is not set. Add the key to enable extraction and AI guidance.";
 
     @Bean
     public TransactionRepository transactionRepository(SpringDataTransactionRepository springDataTransactionRepository) {
@@ -68,16 +74,23 @@ public class TransactionConfiguration {
             @Value("${aura.ai.gemini.api-key}") String apiKey,
             @Value("${aura.ai.gemini.model-name}") String modelName
     ) {
+        if (apiKey == null || apiKey.isBlank()) {
+            return null;
+        }
         return new GeminiResponsesClient(baseUrl, apiKey, modelName, objectMapper);
     }
 
     @Bean
     public TransactionExtractor transactionExtractor(
-            GeminiResponsesClient geminiResponsesClient,
+            org.springframework.beans.factory.ObjectProvider<GeminiResponsesClient> geminiResponsesClientProvider,
             ObjectMapper objectMapper,
             AiResponseCache aiResponseCache,
             @Value("${aura.cache.extract-ttl-minutes}") long extractCacheTtlMinutes
     ) {
+        GeminiResponsesClient geminiResponsesClient = geminiResponsesClientProvider.getIfAvailable();
+        if (geminiResponsesClient == null) {
+            return new UnavailableTransactionExtractor(AI_UNAVAILABLE_MESSAGE);
+        }
         return new GeminiTransactionExtractor(geminiResponsesClient, objectMapper, aiResponseCache, extractCacheTtlMinutes);
     }
 
@@ -95,11 +108,15 @@ public class TransactionConfiguration {
 
     @Bean
     public SpendingAnalysisAdvisor spendingAnalysisAdvisor(
-            GeminiResponsesClient geminiResponsesClient,
+            org.springframework.beans.factory.ObjectProvider<GeminiResponsesClient> geminiResponsesClientProvider,
             ObjectMapper objectMapper,
             AiResponseCache aiResponseCache,
             @Value("${aura.cache.analysis-ttl-minutes}") long analysisCacheTtlMinutes
     ) {
+        GeminiResponsesClient geminiResponsesClient = geminiResponsesClientProvider.getIfAvailable();
+        if (geminiResponsesClient == null) {
+            return new UnavailableSpendingAnalysisAdvisor(AI_UNAVAILABLE_MESSAGE);
+        }
         return new GeminiSpendingAnalysisAdvisor(geminiResponsesClient, objectMapper, aiResponseCache, analysisCacheTtlMinutes);
     }
 
@@ -118,11 +135,15 @@ public class TransactionConfiguration {
 
     @Bean
     public FinancialStrategyExplainer financialStrategyExplainer(
-            GeminiResponsesClient geminiResponsesClient,
+            org.springframework.beans.factory.ObjectProvider<GeminiResponsesClient> geminiResponsesClientProvider,
             ObjectMapper objectMapper,
             AiResponseCache aiResponseCache,
             @Value("${aura.cache.strategy-ttl-minutes}") long strategyCacheTtlMinutes
     ) {
+        GeminiResponsesClient geminiResponsesClient = geminiResponsesClientProvider.getIfAvailable();
+        if (geminiResponsesClient == null) {
+            return new UnavailableFinancialStrategyExplainer(AI_UNAVAILABLE_MESSAGE);
+        }
         return new GeminiFinancialStrategyExplainer(geminiResponsesClient, objectMapper, aiResponseCache, strategyCacheTtlMinutes);
     }
 

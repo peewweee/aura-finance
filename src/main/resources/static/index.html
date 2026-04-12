@@ -6,8 +6,9 @@
     <title>Aura Finance</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 </head>
 <body>
 
@@ -15,27 +16,73 @@
 
 <div class="page-shell">
 
-    <div class="ai-observer" aria-hidden="true">
-        <div class="octahedron-wrap">
-            <div class="observer-ring"></div>
-        </div>
-    </div>
-
     <header class="hero">
         <div class="hero-copy">
-            <p class="eyebrow">Aura</p>
-            <h1>Your money, explained clearly.</h1>
-            <p class="hero-text">
-                Log expenses quickly, understand where your money goes, and make better decisions before you spend.
-            </p>
+
+            <div class="hero-text-block">
+                <p class="eyebrow">Aura Finance</p>
+                <h1>Your money, explained clearly.</h1>
+                <p class="hero-text">
+                    Log expenses quickly, understand where your money goes, and make better decisions before you spend.
+                </p>
+            </div>
+
+            <div class="mascot-wrap">
+                <div class="mascot-bubble">Hey! I'm Aura ✦<br>Let's sort your spending~</div>
+                <svg class="mascot-svg" width="130" height="160" viewBox="0 0 130 160" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Aura the alien mascot">
+                    <defs>
+                        <radialGradient id="headGrad" cx="40%" cy="35%" r="65%">
+                            <stop offset="0%" stop-color="#c4b5fd"/>
+                            <stop offset="45%" stop-color="#8b5cf6"/>
+                            <stop offset="100%" stop-color="#5b21b6"/>
+                        </radialGradient>
+                        <radialGradient id="bodyGrad" cx="40%" cy="30%" r="70%">
+                            <stop offset="0%" stop-color="#a78bfa"/>
+                            <stop offset="100%" stop-color="#6d28d9"/>
+                        </radialGradient>
+                    </defs>
+                    <line x1="65" y1="16" x2="65" y2="40" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle class="mascot-gem" cx="65" cy="11" r="5.5" fill="#7dd3fc" opacity="0.9"/>
+                    <circle cx="65" cy="11" r="3" fill="white" opacity="0.6"/>
+                    <ellipse cx="65" cy="142" rx="32" ry="8" fill="#6d28d9" opacity="0.25"/>
+                    <rect x="38" y="112" width="54" height="34" rx="18" fill="url(#bodyGrad)"/>
+                    <ellipse cx="28" cy="126" rx="6" ry="10" fill="url(#bodyGrad)" transform="rotate(-20 28 126)"/>
+                    <circle cx="22" cy="133" r="5" fill="url(#bodyGrad)"/>
+                    <ellipse cx="102" cy="126" rx="6" ry="10" fill="url(#bodyGrad)" transform="rotate(20 102 126)"/>
+                    <circle cx="108" cy="133" r="5" fill="url(#bodyGrad)"/>
+                    <ellipse cx="65" cy="75" rx="34" ry="36" fill="url(#headGrad)"/>
+                    <ellipse cx="55" cy="58" rx="12" ry="8" fill="white" opacity="0.12" transform="rotate(-20 55 58)"/>
+                    <ellipse cx="52" cy="75" rx="11" ry="12" fill="white" opacity="0.92"/>
+                    <ellipse cx="78" cy="75" rx="11" ry="12" fill="white" opacity="0.92"/>
+                    <g class="mascot-eye-l">
+                        <circle cx="52" cy="76" r="7.5" fill="#7c3aed"/>
+                        <circle cx="52" cy="76" r="4.5" fill="#4c1d95"/>
+                        <circle cx="49" cy="73" r="1.5" fill="white" opacity="0.8"/>
+                        <circle cx="54" cy="79" r="1" fill="white" opacity="0.5"/>
+                    </g>
+                    <g class="mascot-eye-r">
+                        <circle cx="78" cy="76" r="7.5" fill="#7c3aed"/>
+                        <circle cx="78" cy="76" r="4.5" fill="#4c1d95"/>
+                        <circle cx="75" cy="73" r="1.5" fill="white" opacity="0.8"/>
+                        <circle cx="80" cy="79" r="1" fill="white" opacity="0.6"/>
+                    </g>
+                    <ellipse cx="40" cy="86" rx="7" ry="4" fill="#f472b6" opacity="0.3"/>
+                    <ellipse cx="90" cy="86" rx="7" ry="4" fill="#f472b6" opacity="0.3"/>
+                    <path d="M56 90 Q65 97 74 90" stroke="#6d28d9" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+                    <text x="14" y="52" font-size="10" fill="#fbbf24" opacity="0.7">✦</text>
+                    <text x="105" y="68" font-size="8" fill="#7dd3fc" opacity="0.65">✦</text>
+                    <text x="20" y="100" font-size="7" fill="#a78bfa" opacity="0.55">✦</text>
+                </svg>
+            </div>
+
         </div>
     </header>
 
     <main class="dashboard-grid">
+
         <section class="panel">
             <div class="panel-header">
                 <div>
-                    <p class="panel-kicker">Quick Log</p>
                     <h2>Quick Log</h2>
                     <p class="panel-note">Tell Aura what you bought today.</p>
                 </div>
@@ -71,7 +118,6 @@
         <section class="panel">
             <div class="panel-header">
                 <div>
-                    <p class="panel-kicker">My Spending Report</p>
                     <h2>My Spending Report</h2>
                     <p class="panel-note">See where your money went this month.</p>
                 </div>
@@ -100,7 +146,6 @@
         <section class="panel">
             <div class="panel-header">
                 <div>
-                    <p class="panel-kicker">The Cost of Spending</p>
                     <h2>The Cost of Spending</h2>
                     <p class="panel-note">See how much this purchase costs you in future savings.</p>
                 </div>
@@ -133,7 +178,6 @@
         <section class="panel">
             <div class="panel-header">
                 <div>
-                    <p class="panel-kicker">Aura's Advice</p>
                     <h2>Aura's Advice</h2>
                     <p class="panel-note">Get a personalized strategy based on your habits and goals.</p>
                 </div>
@@ -179,22 +223,21 @@
 <script>
 (function () {
     const field = document.getElementById('star-field');
-    const COLORS = ['white', 'white', 'white', '#c4b5fd', '#a5f3fc', '#fde68a'];
-    for (let i = 0; i < 180; i++) {
-        const star    = document.createElement('div');
+    const COLORS = ['white','white','white','white','#c4b5fd','#bae6fd','#fde68a'];
+    for (let i = 0; i < 140; i++) {
+        const star = document.createElement('div');
         star.className = 'star';
-        const size    = Math.random() * 2.2 + 0.4;
-        const opacity = Math.random() * 0.55 + 0.15;
-        const color   = COLORS[Math.floor(Math.random() * COLORS.length)];
+        const size = Math.random() * 2 + 0.3;
+        const opacity = Math.random() * 0.45 + 0.1;
         star.style.cssText = [
             `width:${size}px`,
             `height:${size}px`,
             `top:${Math.random() * 100}%`,
             `left:${Math.random() * 100}%`,
-            `background:${color}`,
+            `background:${COLORS[Math.floor(Math.random() * COLORS.length)]}`,
             `--star-opacity:${opacity.toFixed(2)}`,
-            `--twinkle-dur:${(Math.random() * 4 + 2).toFixed(1)}s`,
-            `--twinkle-delay:${(Math.random() * 6).toFixed(1)}s`,
+            `--twinkle-dur:${(Math.random() * 5 + 3).toFixed(1)}s`,
+            `--twinkle-delay:${(Math.random() * 7).toFixed(1)}s`,
         ].join(';');
         field.appendChild(star);
     }
@@ -207,13 +250,13 @@
                 void v.offsetWidth;
                 v.classList.add('glitch-text');
             });
-        }, 400);
+        }, 420);
     });
 
     const confirmBtn = document.getElementById('confirm-selected-btn');
     confirmBtn && confirmBtn.addEventListener('click', () => {
         document.querySelectorAll('.draft-item').forEach((item, i) => {
-            setTimeout(() => item.classList.add('vanish'), i * 60);
+            setTimeout(() => item.classList.add('vanish'), i * 70);
         });
     });
 })();
