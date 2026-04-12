@@ -43,8 +43,8 @@ extractForm.addEventListener("submit", async (event) => {
         setStatus(extractStatus, `Aura found ${response.length} possible transaction(s).`, "success");
     } catch (error) {
         state.extractedTransactions = [];
-        renderExtractedTransactions();
-        setStatus(extractStatus, error.message, "error");
+        renderExtractionWarning(error);
+        setStatus(extractStatus, userFacingErrorMessage(error.message), "error");
     }
 });
 
@@ -81,7 +81,8 @@ analysisForm.addEventListener("submit", async (event) => {
         renderAnalysis(result);
         setStatus(analysisStatus, "Spending analysis ready.", "success");
     } catch (error) {
-        setStatus(analysisStatus, error.message, "error");
+        renderAiWarning(analysisResult, error.message, "Aura needs a quick reset");
+        setStatus(analysisStatus, userFacingErrorMessage(error.message), "error");
     }
 });
 
@@ -128,7 +129,8 @@ strategyForm.addEventListener("submit", async (event) => {
         renderStrategy(result);
         setStatus(strategyStatus, "Financial strategy guidance ready.", "success");
     } catch (error) {
-        setStatus(strategyStatus, error.message, "error");
+        renderAiWarning(strategyResult, error.message, "Aura is resting for a bit");
+        setStatus(strategyStatus, userFacingErrorMessage(error.message), "error");
     }
 });
 
@@ -322,6 +324,33 @@ function renderStrategy(result) {
     `;
 }
 
+function renderExtractionWarning(error) {
+    extractedList.className = "draft-list";
+    extractedList.innerHTML = buildWarningCardHtml(
+        "Aura is resting for a bit",
+        userFacingErrorDetail(error.message, "Try again in a little while. If several people are testing the app, Aura may have hit its AI usage limit for now.")
+    );
+    confirmSelectedBtn.disabled = true;
+}
+
+function renderAiWarning(target, message, title) {
+    target.className = "result-card";
+    target.innerHTML = buildWarningCardHtml(
+        title,
+        userFacingErrorDetail(message, "Please try again shortly. If the app is busy, the AI quota may need a little time to refresh.")
+    );
+}
+
+function buildWarningCardHtml(title, message) {
+    return `
+        <div class="warning-card">
+            <span class="warning-badge">Aura Notice</span>
+            <h3 class="warning-title">${escapeHtml(title)}</h3>
+            <p class="warning-copy">${escapeHtml(message)}</p>
+        </div>
+    `;
+}
+
 async function fetchJson(url) {
     const response = await fetch(url);
     return handleResponse(response);
@@ -378,6 +407,30 @@ function setStatus(element, message, type = "") {
     }
 
     element.textContent = message;
+}
+
+function userFacingErrorMessage(message) {
+    if (isQuotaOrRateLimitError(message)) {
+        return "Aura is temporarily busy right now. Please try again shortly.";
+    }
+    return message;
+}
+
+function userFacingErrorDetail(message, fallback) {
+    if (isQuotaOrRateLimitError(message)) {
+        return fallback;
+    }
+    return message || fallback;
+}
+
+function isQuotaOrRateLimitError(message) {
+    const normalized = String(message ?? "").toLowerCase();
+    return normalized.includes("quota")
+        || normalized.includes("resource_exhausted")
+        || normalized.includes("rate limit")
+        || normalized.includes("too many requests")
+        || normalized.includes("429")
+        || normalized.includes("exceeded");
 }
 
 function startStatusAnimation(element, baseMessage) {
