@@ -496,6 +496,14 @@ textarea {
     transition: border-color 0.3s ease;
 }
 
+.table-shell {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
 .empty-state,
 .muted {
     color: var(--muted);
@@ -539,6 +547,7 @@ textarea {
 
 .table {
     width: 100%;
+    min-width: 540px;
     border-collapse: collapse;
     font-family: var(--font-mono);
     font-size: 0.86rem;
@@ -722,4 +731,7 @@ textarea {
     }
     .hero h1 { font-size: 1.75rem; }
     .panel h2 { font-size: 0.9rem; }
+    .table {
+        min-width: 500px;
+    }
 }

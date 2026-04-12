@@ -76,6 +76,8 @@ public class GeminiFinancialStrategyExplainer implements FinancialStrategyExplai
                 - If purchase simulation data exists, connect it to the recommendation.
                 - cautionFlags should be short and practical.
                 - recommendationText should be concise but actionable.
+                - This app uses Philippine peso. Never refer to dollars, USD, or "$".
+                - When mentioning money, always format it as peso with comma separators, like ₱5,000.00.
 
                 Structured input:
                 startDate: %s
@@ -92,13 +94,13 @@ public class GeminiFinancialStrategyExplainer implements FinancialStrategyExplai
                 request.startDate(),
                 request.endDate(),
                 request.transactionCount(),
-                request.totalSpent(),
-                request.spendingByCategory(),
-                request.plannedPurchaseAmount(),
+                AiMoneyFormatter.formatPhp(request.totalSpent()),
+                AiMoneyFormatter.formatPhpMapInline(request.spendingByCategory()),
+                AiMoneyFormatter.formatPhp(request.plannedPurchaseAmount()),
                 request.expectedMonthlyReturnRate(),
                 request.timeHorizonMonths(),
-                request.futureValueIfInvested(),
-                request.opportunityCost()
+                AiMoneyFormatter.formatPhp(request.futureValueIfInvested()),
+                AiMoneyFormatter.formatPhp(request.opportunityCost())
         );
     }
 
@@ -160,7 +162,10 @@ public class GeminiFinancialStrategyExplainer implements FinancialStrategyExplai
         }
 
         if (request.opportunityCost() != null && request.opportunityCost().signum() > 0) {
-            cautionFlags.add("The planned purchase has a measurable long-term opportunity cost if you skip investing that amount.");
+            cautionFlags.add(
+                    "The planned purchase has a measurable long-term opportunity cost of %s if you skip investing that amount."
+                            .formatted(AiMoneyFormatter.formatPhp(request.opportunityCost()))
+            );
         }
 
         if (cautionFlags.isEmpty()) {

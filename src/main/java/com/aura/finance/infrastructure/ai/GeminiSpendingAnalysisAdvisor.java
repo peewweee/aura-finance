@@ -83,6 +83,8 @@ public class GeminiSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
                 - Only say data is insufficient when transactionCount is exactly 0.
                 - If there are 1 or more transactions, identify the top spending category and compare it with the others.
                 - Recommendations should be concrete and action-oriented, not generic.
+                - This app uses Philippine peso. Never refer to dollars, USD, or "$".
+                - When mentioning money, always format it as peso with comma separators, like ₱5,000.00.
 
                 Input:
                 startDate: %s
@@ -107,8 +109,8 @@ public class GeminiSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
                 request.startDate(),
                 request.endDate(),
                 request.transactionCount(),
-                request.totalSpent(),
-                request.spendingByCategory()
+                AiMoneyFormatter.formatPhp(request.totalSpent()),
+                AiMoneyFormatter.formatPhpMapInline(request.spendingByCategory())
         );
     }
 
@@ -160,7 +162,13 @@ public class GeminiSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
                 .orElse("OTHER");
 
         return "You recorded %d transactions and spent a total of %s from %s to %s, with %s as your largest category."
-                .formatted(request.transactionCount(), request.totalSpent(), request.startDate(), request.endDate(), topCategory);
+                .formatted(
+                        request.transactionCount(),
+                        AiMoneyFormatter.formatPhp(request.totalSpent()),
+                        request.startDate(),
+                        request.endDate(),
+                        topCategory
+                );
     }
 
     private List<String> buildFallbackInsights(SpendingAnalysisRequest request) {
@@ -179,8 +187,9 @@ public class GeminiSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
                 .getOrDefault(topCategory, java.math.BigDecimal.ZERO);
 
         return List.of(
-                "%s is your largest spending category at %s.".formatted(topCategory, topCategoryAmount),
-                "You spent a total of %s across %d transactions in this date range.".formatted(request.totalSpent(), request.transactionCount())
+                "%s is your largest spending category at %s.".formatted(topCategory, AiMoneyFormatter.formatPhp(topCategoryAmount)),
+                "You spent a total of %s across %d transactions in this date range."
+                        .formatted(AiMoneyFormatter.formatPhp(request.totalSpent()), request.transactionCount())
         );
     }
 
@@ -196,7 +205,8 @@ public class GeminiSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
                 .orElse(java.math.BigDecimal.ZERO);
 
         return List.of(
-                "Review the category where you spent %s the most and decide if part of it can be reduced.".formatted(topCategoryAmount),
+                "Review the category where you spent %s the most and decide if part of it can be reduced."
+                        .formatted(AiMoneyFormatter.formatPhp(topCategoryAmount)),
                 "Use this result as a baseline and compare the same categories again in your next tracking period."
         );
     }
