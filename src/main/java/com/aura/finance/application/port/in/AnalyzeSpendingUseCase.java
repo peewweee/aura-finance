@@ -11,10 +11,12 @@ public interface AnalyzeSpendingUseCase {
     SpendingAnalysisResult analyzeSpending(AnalyzeSpendingCommand command);
 
     record AnalyzeSpendingCommand(
+            java.util.UUID sessionId,
             LocalDate startDate,
             LocalDate endDate
     ) {
         public AnalyzeSpendingCommand {
+            Objects.requireNonNull(sessionId, "sessionId must not be null");
             Objects.requireNonNull(startDate, "startDate must not be null");
             Objects.requireNonNull(endDate, "endDate must not be null");
 

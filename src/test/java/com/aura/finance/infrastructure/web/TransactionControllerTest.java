@@ -40,11 +40,16 @@ class TransactionControllerTest {
     @MockBean
     private GetTransactionByIdUseCase getTransactionByIdUseCase;
 
+    @MockBean
+    private AnonymousSessionManager anonymousSessionManager;
+
     @Test
     void shouldCreateTransactionAndReturnLocationHeader() throws Exception {
         UUID transactionId = UUID.randomUUID();
+        UUID sessionId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
         Transaction transaction = new Transaction(
                 transactionId,
+                sessionId,
                 "Emergency fund deposit",
                 new BigDecimal("5000.00"),
                 "SAVINGS",
@@ -53,6 +58,7 @@ class TransactionControllerTest {
 
         when(createTransactionUseCase.createTransaction(any(CreateTransactionCommand.class)))
                 .thenReturn(transaction);
+        when(anonymousSessionManager.resolveSessionId(any(), any())).thenReturn(sessionId);
 
         mockMvc.perform(post("/transactions")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -95,15 +101,18 @@ class TransactionControllerTest {
     @Test
     void shouldReturnTransactionWhenIdExists() throws Exception {
         UUID transactionId = UUID.randomUUID();
+        UUID sessionId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
         Transaction transaction = new Transaction(
                 transactionId,
+                sessionId,
                 "Emergency fund deposit",
                 new BigDecimal("5000.00"),
                 "SAVINGS",
                 LocalDate.of(2026, 4, 6)
         );
 
-        when(getTransactionByIdUseCase.getTransactionById(transactionId))
+        when(anonymousSessionManager.resolveSessionId(any(), any())).thenReturn(sessionId);
+        when(getTransactionByIdUseCase.getTransactionById(sessionId, transactionId))
                 .thenReturn(Optional.of(transaction));
 
         mockMvc.perform(get("/transactions/{transactionId}", transactionId))
@@ -118,8 +127,10 @@ class TransactionControllerTest {
     @Test
     void shouldReturnNotFoundWhenIdDoesNotExist() throws Exception {
         UUID transactionId = UUID.randomUUID();
+        UUID sessionId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
 
-        when(getTransactionByIdUseCase.getTransactionById(transactionId))
+        when(anonymousSessionManager.resolveSessionId(any(), any())).thenReturn(sessionId);
+        when(getTransactionByIdUseCase.getTransactionById(sessionId, transactionId))
                 .thenReturn(Optional.empty());
 
         mockMvc.perform(get("/transactions/{transactionId}", transactionId))

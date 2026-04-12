@@ -1,0 +1,31 @@
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework
+
+spring:
+  datasource:
+    url: ${AURA_DB_URL:jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:aura_finance}}
+    driver-class-name: org.postgresql.Driver
+    username: ${AURA_DB_USERNAME:${PGUSER:postgres}}
+    password: ${AURA_DB_PASSWORD:${PGPASSWORD:postgres}}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
+  h2:
+    console:
+      enabled: false
+  data:
+    redis:
+      host: ${AURA_REDIS_HOST:localhost}
+      port: ${AURA_REDIS_PORT:6379}
+      timeout: 2s
+
+aura:
+  redis:
+    enabled: false

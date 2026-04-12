@@ -7,5 +7,5 @@ import java.util.UUID;
 
 public interface GetTransactionByIdUseCase {
 
-    Optional<Transaction> getTransactionById(UUID transactionId);
+    Optional<Transaction> getTransactionById(UUID sessionId, UUID transactionId);
 }

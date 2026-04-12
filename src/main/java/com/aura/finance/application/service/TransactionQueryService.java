@@ -16,7 +16,7 @@ public class TransactionQueryService implements ListTransactionsUseCase {
     }
 
     @Override
-    public List<Transaction> listTransactions() {
-        return transactionRepository.findAll();
+    public List<Transaction> listTransactions(java.util.UUID sessionId) {
+        return transactionRepository.findAllBySessionId(sessionId);
     }
 }

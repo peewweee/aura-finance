@@ -21,6 +21,7 @@ public class CreateTransactionService implements CreateTransactionUseCase {
 
         Transaction transaction = new Transaction(
                 transactionId,
+                command.sessionId(),
                 command.description(),
                 command.amount(),
                 command.category(),

@@ -11,6 +11,7 @@ public interface ExplainFinancialStrategyUseCase {
     FinancialStrategyResult explainStrategy(FinancialStrategyCommand command);
 
     record FinancialStrategyCommand(
+            java.util.UUID sessionId,
             LocalDate startDate,
             LocalDate endDate,
             BigDecimal plannedPurchaseAmount,
@@ -18,6 +19,7 @@ public interface ExplainFinancialStrategyUseCase {
             Integer timeHorizonMonths
     ) {
         public FinancialStrategyCommand {
+            Objects.requireNonNull(sessionId, "sessionId must not be null");
             Objects.requireNonNull(startDate, "startDate must not be null");
             Objects.requireNonNull(endDate, "endDate must not be null");
 

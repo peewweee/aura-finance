@@ -12,6 +12,7 @@ public interface CreateTransactionUseCase {
 
     record CreateTransactionCommand(
             UUID id,
+            UUID sessionId,
             String description,
             BigDecimal amount,
             String category,

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -20,6 +21,7 @@ class CreateTransactionServiceTest {
 
         CreateTransactionCommand command = new CreateTransactionCommand(
                 null,
+                UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
                 "Laptop upgrade",
                 new BigDecimal("45000.00"),
                 "TECHNOLOGY",
@@ -29,6 +31,7 @@ class CreateTransactionServiceTest {
         Transaction transaction = createTransactionService.createTransaction(command);
 
         assertNotNull(transaction.id());
+        assertEquals(UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), transaction.sessionId());
         assertEquals("Laptop upgrade", transaction.description());
         assertEquals(new BigDecimal("45000.00"), transaction.amount());
         assertEquals("TECHNOLOGY", transaction.category());

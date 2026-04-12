@@ -3,35 +3,41 @@ package com.aura.finance.infrastructure.ai;
 import com.aura.finance.application.port.out.FinancialStrategyExplainer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.langchain4j.model.ollama.OllamaChatModel;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OllamaFinancialStrategyExplainer implements FinancialStrategyExplainer {
+public class GeminiFinancialStrategyExplainer implements FinancialStrategyExplainer {
 
-    private final OllamaChatModel chatModel;
+    private final GeminiResponsesClient responsesClient;
     private final ObjectMapper objectMapper;
+    private final AiResponseCache aiResponseCache;
+    private final Duration cacheTtl;
 
-    public OllamaFinancialStrategyExplainer(String baseUrl, String modelName, ObjectMapper objectMapper) {
-        this.chatModel = OllamaChatModel.builder()
-                .baseUrl(baseUrl)
-                .modelName(modelName)
-                .temperature(0.2)
-                .timeout(Duration.ofSeconds(60))
-                .build();
+    public GeminiFinancialStrategyExplainer(
+            GeminiResponsesClient responsesClient,
+            ObjectMapper objectMapper,
+            AiResponseCache aiResponseCache,
+            long cacheTtlMinutes
+    ) {
+        this.responsesClient = responsesClient;
         this.objectMapper = objectMapper;
+        this.aiResponseCache = aiResponseCache;
+        this.cacheTtl = Duration.ofMinutes(cacheTtlMinutes);
     }
 
     @Override
     public FinancialStrategyExplanation explain(FinancialStrategyRequest request) {
+        String prompt = buildPrompt(request);
         String rawResponse;
-        try {
-            rawResponse = chatModel.chat(buildPrompt(request));
-        } catch (RuntimeException exception) {
-            throw new AiIntegrationException("Failed to call Ollama for financial strategy explanation. Make sure Ollama is running and the model is installed.", exception);
+        java.util.Optional<String> cachedResponse = aiResponseCache.get("strategy", prompt);
+        if (cachedResponse.isPresent()) {
+            rawResponse = cachedResponse.get();
+        } else {
+            rawResponse = responsesClient.generateText(prompt, 0.2);
+            aiResponseCache.put("strategy", prompt, rawResponse, cacheTtl);
         }
 
         try {
@@ -111,7 +117,7 @@ public class OllamaFinancialStrategyExplainer implements FinancialStrategyExplai
         int start = cleaned.indexOf('{');
         int end = cleaned.lastIndexOf('}');
         if (start == -1 || end == -1 || end < start) {
-            throw new AiIntegrationException("Ollama did not return a JSON object for financial strategy explanation: " + rawResponse);
+            throw new AiIntegrationException("Hosted AI did not return a JSON object for financial strategy explanation: " + rawResponse);
         }
 
         return cleaned.substring(start, end + 1);

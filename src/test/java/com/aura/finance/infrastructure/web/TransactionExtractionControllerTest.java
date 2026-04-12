@@ -33,6 +33,12 @@ class TransactionExtractionControllerTest {
     @MockBean
     private ConfirmExtractedTransactionsUseCase confirmExtractedTransactionsUseCase;
 
+    @MockBean
+    private AnonymousSessionManager anonymousSessionManager;
+
+    @MockBean
+    private RequestRateLimiter requestRateLimiter;
+
     @Test
     void shouldReturnExtractedTransactions() throws Exception {
         when(extractTransactionsUseCase.extractTransactions(any(ExtractTransactionsUseCase.ExtractTransactionsCommand.class)))
@@ -70,10 +76,12 @@ class TransactionExtractionControllerTest {
 
     @Test
     void shouldSaveConfirmedTransactions() throws Exception {
+        UUID sessionId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
         when(confirmExtractedTransactionsUseCase.confirmTransactions(any(ConfirmExtractedTransactionsUseCase.ConfirmExtractedTransactionsCommand.class)))
                 .thenReturn(List.of(
                         new Transaction(
                                 UUID.fromString("11111111-1111-1111-1111-111111111111"),
+                                sessionId,
                                 "Coffee",
                                 new BigDecimal("150.00"),
                                 "FOOD",
@@ -81,12 +89,14 @@ class TransactionExtractionControllerTest {
                         ),
                         new Transaction(
                                 UUID.fromString("22222222-2222-2222-2222-222222222222"),
+                                sessionId,
                                 "Jeep fare",
                                 new BigDecimal("13.00"),
                                 "TRANSPORT",
                                 LocalDate.of(2026, 4, 9)
                         )
                 ));
+        when(anonymousSessionManager.resolveSessionId(any(), any())).thenReturn(sessionId);
 
         mockMvc.perform(post("/transaction-extraction/confirm")
                         .contentType(MediaType.APPLICATION_JSON)

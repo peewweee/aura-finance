@@ -6,5 +6,5 @@ import java.util.List;
 
 public interface ListTransactionsUseCase {
 
-    List<Transaction> listTransactions();
+    List<Transaction> listTransactions(java.util.UUID sessionId);
 }

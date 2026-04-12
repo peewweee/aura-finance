@@ -22,9 +22,11 @@ class JpaTransactionRepositoryAdapterTest {
     void shouldSaveAndLoadTransactionsUsingJpa() {
         JpaTransactionRepositoryAdapter transactionRepository =
                 new JpaTransactionRepositoryAdapter(springDataTransactionRepository);
+        UUID sessionId = UUID.fromString("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
 
         Transaction transaction = new Transaction(
                 UUID.randomUUID(),
+                sessionId,
                 "Emergency fund deposit",
                 new BigDecimal("5000.00"),
                 "SAVINGS",
@@ -32,9 +34,10 @@ class JpaTransactionRepositoryAdapterTest {
         );
 
         transactionRepository.save(transaction);
-        List<Transaction> transactions = transactionRepository.findAll();
+        List<Transaction> transactions = transactionRepository.findAllBySessionId(sessionId);
 
         assertEquals(1, transactions.size());
+        assertEquals(sessionId, transactions.getFirst().sessionId());
         assertEquals("Emergency fund deposit", transactions.getFirst().description());
         assertEquals(new BigDecimal("5000.00"), transactions.getFirst().amount());
         assertEquals("SAVINGS", transactions.getFirst().category());

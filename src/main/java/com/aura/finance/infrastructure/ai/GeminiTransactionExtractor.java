@@ -3,7 +3,6 @@ package com.aura.finance.infrastructure.ai;
 import com.aura.finance.application.port.out.TransactionExtractor;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.langchain4j.model.ollama.OllamaChatModel;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -20,9 +19,9 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class OllamaTransactionExtractor implements TransactionExtractor {
+public class GeminiTransactionExtractor implements TransactionExtractor {
 
-    private static final TypeReference<List<OllamaExtractedTransaction>> RESPONSE_TYPE = new TypeReference<>() {
+    private static final TypeReference<List<ModelExtractedTransaction>> RESPONSE_TYPE = new TypeReference<>() {
     };
     private static final Pattern SPLIT_PATTERN = Pattern.compile(
             "(?i)\\s*(?:,|\\band\\b|\\bat\\b|\\bthen\\b|\\btapos\\b|\\bplus\\b|&|\\btsaka\\b)\\s*"
@@ -43,26 +42,33 @@ public class OllamaTransactionExtractor implements TransactionExtractor {
             "today", "kanina", "ngayon", "earlier", "yesterday", "kahapon", "php", "peso", "pesos"
     );
 
-    private final OllamaChatModel chatModel;
+    private final GeminiResponsesClient responsesClient;
     private final ObjectMapper objectMapper;
+    private final AiResponseCache aiResponseCache;
+    private final Duration cacheTtl;
 
-    public OllamaTransactionExtractor(String baseUrl, String modelName, ObjectMapper objectMapper) {
-        this.chatModel = OllamaChatModel.builder()
-                .baseUrl(baseUrl)
-                .modelName(modelName)
-                .temperature(0.0)
-                .timeout(Duration.ofSeconds(60))
-                .build();
+    public GeminiTransactionExtractor(
+            GeminiResponsesClient responsesClient,
+            ObjectMapper objectMapper,
+            AiResponseCache aiResponseCache,
+            long cacheTtlMinutes
+    ) {
+        this.responsesClient = responsesClient;
         this.objectMapper = objectMapper;
+        this.aiResponseCache = aiResponseCache;
+        this.cacheTtl = Duration.ofMinutes(cacheTtlMinutes);
     }
 
     @Override
     public List<ExtractedTransaction> extract(ExtractionRequest request) {
+        String prompt = buildPrompt(request);
         String rawResponse;
-        try {
-            rawResponse = chatModel.chat(buildPrompt(request));
-        } catch (RuntimeException exception) {
-            throw new AiIntegrationException("Failed to call Ollama. Make sure Ollama is running and the model is installed.", exception);
+        java.util.Optional<String> cachedResponse = aiResponseCache.get("extract", prompt);
+        if (cachedResponse.isPresent()) {
+            rawResponse = cachedResponse.get();
+        } else {
+            rawResponse = responsesClient.generateText(prompt, 0.0);
+            aiResponseCache.put("extract", prompt, rawResponse, cacheTtl);
         }
 
         String cleanedResponse = stripCodeFences(rawResponse);
@@ -84,7 +90,7 @@ public class OllamaTransactionExtractor implements TransactionExtractor {
                 return fallbackTransactions;
             }
 
-            throw new AiIntegrationException("Ollama returned a response that is not valid transaction JSON: " + rawResponse, exception);
+            throw new AiIntegrationException("Hosted AI returned a response that is not valid transaction JSON: " + rawResponse, exception);
         }
     }
 
@@ -211,7 +217,7 @@ public class OllamaTransactionExtractor implements TransactionExtractor {
         int end = response.lastIndexOf(']');
 
         if (start == -1 || end == -1 || end < start) {
-            throw new AiIntegrationException("Ollama did not return a JSON array: " + response);
+            throw new AiIntegrationException("Hosted AI did not return a JSON array: " + response);
         }
 
         return response.substring(start, end + 1);
@@ -507,7 +513,7 @@ public class OllamaTransactionExtractor implements TransactionExtractor {
     }
 
     private ExtractedTransaction toExtractedTransaction(
-            OllamaExtractedTransaction item,
+            ModelExtractedTransaction item,
             LocalDate referenceDate
     ) {
         String description = normalizeDescription(item.description());
@@ -526,7 +532,7 @@ public class OllamaTransactionExtractor implements TransactionExtractor {
         );
     }
 
-    private record OllamaExtractedTransaction(
+    private record ModelExtractedTransaction(
             String description,
             java.math.BigDecimal amount,
             String category,

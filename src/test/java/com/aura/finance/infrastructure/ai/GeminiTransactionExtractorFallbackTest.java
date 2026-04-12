@@ -9,11 +9,11 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class OllamaTransactionExtractorFallbackTest {
+class GeminiTransactionExtractorFallbackTest {
 
     @Test
     void shouldParseSimpleTaglishTransactionsFromRawTextFallback() {
-        List<TransactionExtractor.ExtractedTransaction> result = OllamaTransactionExtractor.parseTransactionsFromText(
+        List<TransactionExtractor.ExtractedTransaction> result = GeminiTransactionExtractor.parseTransactionsFromText(
                 "Groceries 1850, kape 150, at jeep 13 today.",
                 LocalDate.of(2026, 4, 12)
         );
@@ -35,7 +35,7 @@ class OllamaTransactionExtractorFallbackTest {
 
     @Test
     void shouldParseAmountBeforeDescriptionWithYesterday() {
-        List<TransactionExtractor.ExtractedTransaction> result = OllamaTransactionExtractor.parseTransactionsFromText(
+        List<TransactionExtractor.ExtractedTransaction> result = GeminiTransactionExtractor.parseTransactionsFromText(
                 "bought 99 pesos chicken yesterday",
                 LocalDate.of(2026, 4, 12)
         );

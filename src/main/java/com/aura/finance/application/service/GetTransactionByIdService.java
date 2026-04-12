@@ -17,7 +17,7 @@ public class GetTransactionByIdService implements GetTransactionByIdUseCase {
     }
 
     @Override
-    public Optional<Transaction> getTransactionById(UUID transactionId) {
-        return transactionRepository.findById(transactionId);
+    public Optional<Transaction> getTransactionById(UUID sessionId, UUID transactionId) {
+        return transactionRepository.findByIdAndSessionId(transactionId, sessionId);
     }
 }

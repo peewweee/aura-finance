@@ -22,6 +22,7 @@ public class ConfirmExtractedTransactionsService implements ConfirmExtractedTran
                 .stream()
                 .map(confirmedTransaction -> new Transaction(
                         UUID.randomUUID(),
+                        command.sessionId(),
                         confirmedTransaction.description(),
                         confirmedTransaction.amount(),
                         confirmedTransaction.category(),

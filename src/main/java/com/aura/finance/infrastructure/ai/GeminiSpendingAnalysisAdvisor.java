@@ -3,37 +3,42 @@ package com.aura.finance.infrastructure.ai;
 import com.aura.finance.application.port.out.SpendingAnalysisAdvisor;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.langchain4j.model.ollama.OllamaChatModel;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class OllamaSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
+public class GeminiSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
 
-    private final OllamaChatModel chatModel;
+    private final GeminiResponsesClient responsesClient;
     private final ObjectMapper objectMapper;
+    private final AiResponseCache aiResponseCache;
+    private final Duration cacheTtl;
 
-    public OllamaSpendingAnalysisAdvisor(String baseUrl, String modelName, ObjectMapper objectMapper) {
-        this.chatModel = OllamaChatModel.builder()
-                .baseUrl(baseUrl)
-                .modelName(modelName)
-                .temperature(0.2)
-                .timeout(Duration.ofSeconds(60))
-                .build();
+    public GeminiSpendingAnalysisAdvisor(
+            GeminiResponsesClient responsesClient,
+            ObjectMapper objectMapper,
+            AiResponseCache aiResponseCache,
+            long cacheTtlMinutes
+    ) {
+        this.responsesClient = responsesClient;
         this.objectMapper = objectMapper;
+        this.aiResponseCache = aiResponseCache;
+        this.cacheTtl = Duration.ofMinutes(cacheTtlMinutes);
     }
 
     @Override
     public SpendingAnalysis advise(SpendingAnalysisRequest request) {
+        String prompt = buildPrompt(request);
         String rawResponse;
-        try {
-            rawResponse = chatModel.chat(buildPrompt(request));
-        } catch (RuntimeException exception) {
-            throw new AiIntegrationException("Failed to call Ollama for spending analysis. Make sure Ollama is running and the model is installed.", exception);
+        java.util.Optional<String> cachedResponse = aiResponseCache.get("analysis", prompt);
+        if (cachedResponse.isPresent()) {
+            rawResponse = cachedResponse.get();
+        } else {
+            rawResponse = responsesClient.generateText(prompt, 0.2);
+            aiResponseCache.put("analysis", prompt, rawResponse, cacheTtl);
         }
 
         try {
@@ -122,7 +127,7 @@ public class OllamaSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
         int start = cleaned.indexOf('{');
         int end = cleaned.lastIndexOf('}');
         if (start == -1 || end == -1 || end < start) {
-            throw new AiIntegrationException("Ollama did not return a JSON object for spending analysis: " + rawResponse);
+            throw new AiIntegrationException("Hosted AI did not return a JSON object for spending analysis: " + rawResponse);
         }
 
         return cleaned.substring(start, end + 1);
@@ -170,8 +175,8 @@ public class OllamaSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
                 .map(Map.Entry::getKey)
                 .orElse("OTHER");
 
-        BigDecimal topCategoryAmount = request.spendingByCategory()
-                .getOrDefault(topCategory, BigDecimal.ZERO);
+        java.math.BigDecimal topCategoryAmount = request.spendingByCategory()
+                .getOrDefault(topCategory, java.math.BigDecimal.ZERO);
 
         return List.of(
                 "%s is your largest spending category at %s.".formatted(topCategory, topCategoryAmount),
@@ -184,11 +189,11 @@ public class OllamaSpendingAnalysisAdvisor implements SpendingAnalysisAdvisor {
             return List.of("Add more transaction data first, then run the analysis again.");
         }
 
-        BigDecimal topCategoryAmount = request.spendingByCategory()
+        java.math.BigDecimal topCategoryAmount = request.spendingByCategory()
                 .values()
                 .stream()
-                .max(BigDecimal::compareTo)
-                .orElse(BigDecimal.ZERO);
+                .max(java.math.BigDecimal::compareTo)
+                .orElse(java.math.BigDecimal.ZERO);
 
         return List.of(
                 "Review the category where you spent %s the most and decide if part of it can be reduced.".formatted(topCategoryAmount),

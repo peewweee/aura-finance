@@ -20,12 +20,15 @@ public class InMemoryTransactionRepository implements TransactionRepository {
     }
 
     @Override
-    public List<Transaction> findAll() {
-        return storage.values().stream().toList();
+    public List<Transaction> findAllBySessionId(UUID sessionId) {
+        return storage.values().stream()
+                .filter(transaction -> transaction.sessionId().equals(sessionId))
+                .toList();
     }
 
     @Override
-    public Optional<Transaction> findById(UUID transactionId) {
-        return Optional.ofNullable(storage.get(transactionId));
+    public Optional<Transaction> findByIdAndSessionId(UUID transactionId, UUID sessionId) {
+        return Optional.ofNullable(storage.get(transactionId))
+                .filter(transaction -> transaction.sessionId().equals(sessionId));
     }
 }

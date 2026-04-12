@@ -32,7 +32,7 @@ public class ExplainFinancialStrategyService implements ExplainFinancialStrategy
 
     @Override
     public FinancialStrategyResult explainStrategy(FinancialStrategyCommand command) {
-        List<Transaction> transactions = transactionRepository.findAll()
+        List<Transaction> transactions = transactionRepository.findAllBySessionId(command.sessionId())
                 .stream()
                 .filter(transaction -> !transaction.transactionDate().isBefore(command.startDate()))
                 .filter(transaction -> !transaction.transactionDate().isAfter(command.endDate()))

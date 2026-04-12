@@ -10,7 +10,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockCookie;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -74,7 +76,7 @@ class AuraDemoFlowTest {
                         )
                 ));
 
-        mockMvc.perform(post("/transaction-extraction")
+        MvcResult extractResult = mockMvc.perform(post("/transaction-extraction")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -84,9 +86,15 @@ class AuraDemoFlowTest {
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].description").value("Coffee"))
-                .andExpect(jsonPath("$[1].description").value("Groceries"));
+                .andExpect(jsonPath("$[1].description").value("Groceries"))
+                .andReturn();
+
+        jakarta.servlet.http.Cookie responseCookie = extractResult.getResponse()
+                .getCookie(AnonymousSessionManager.SESSION_COOKIE_NAME);
+        MockCookie sessionCookie = new MockCookie(responseCookie.getName(), responseCookie.getValue());
 
         mockMvc.perform(post("/transaction-extraction/confirm")
+                        .cookie(sessionCookie)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -111,6 +119,7 @@ class AuraDemoFlowTest {
                 .andExpect(jsonPath("$[1].id").isNotEmpty());
 
         mockMvc.perform(post("/spending-analysis")
+                        .cookie(sessionCookie)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {

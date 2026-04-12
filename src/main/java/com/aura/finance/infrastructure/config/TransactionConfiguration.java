@@ -20,15 +20,23 @@ import com.aura.finance.application.service.ExtractTransactionsService;
 import com.aura.finance.application.service.GetTransactionByIdService;
 import com.aura.finance.application.service.SimulatePurchaseService;
 import com.aura.finance.application.service.TransactionQueryService;
-import com.aura.finance.infrastructure.ai.OllamaFinancialStrategyExplainer;
-import com.aura.finance.infrastructure.ai.OllamaSpendingAnalysisAdvisor;
-import com.aura.finance.infrastructure.ai.OllamaTransactionExtractor;
+import com.aura.finance.infrastructure.ai.AiResponseCache;
+import com.aura.finance.infrastructure.ai.GeminiFinancialStrategyExplainer;
+import com.aura.finance.infrastructure.ai.GeminiResponsesClient;
+import com.aura.finance.infrastructure.ai.GeminiSpendingAnalysisAdvisor;
+import com.aura.finance.infrastructure.ai.GeminiTransactionExtractor;
+import com.aura.finance.infrastructure.ai.NoOpAiResponseCache;
+import com.aura.finance.infrastructure.ai.RedisAiResponseCache;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.aura.finance.infrastructure.persistence.JpaTransactionRepositoryAdapter;
 import com.aura.finance.infrastructure.persistence.SpringDataTransactionRepository;
+import com.aura.finance.infrastructure.web.NoOpRequestRateLimiter;
+import com.aura.finance.infrastructure.web.RedisRequestRateLimiter;
+import com.aura.finance.infrastructure.web.RequestRateLimiter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 @Configuration
 public class TransactionConfiguration {
@@ -54,12 +62,23 @@ public class TransactionConfiguration {
     }
 
     @Bean
-    public TransactionExtractor transactionExtractor(
+    public GeminiResponsesClient geminiResponsesClient(
             ObjectMapper objectMapper,
-            @Value("${aura.ai.ollama.base-url}") String baseUrl,
-            @Value("${aura.ai.ollama.model-name}") String modelName
+            @Value("${aura.ai.gemini.base-url}") String baseUrl,
+            @Value("${aura.ai.gemini.api-key}") String apiKey,
+            @Value("${aura.ai.gemini.model-name}") String modelName
     ) {
-        return new OllamaTransactionExtractor(baseUrl, modelName, objectMapper);
+        return new GeminiResponsesClient(baseUrl, apiKey, modelName, objectMapper);
+    }
+
+    @Bean
+    public TransactionExtractor transactionExtractor(
+            GeminiResponsesClient geminiResponsesClient,
+            ObjectMapper objectMapper,
+            AiResponseCache aiResponseCache,
+            @Value("${aura.cache.extract-ttl-minutes}") long extractCacheTtlMinutes
+    ) {
+        return new GeminiTransactionExtractor(geminiResponsesClient, objectMapper, aiResponseCache, extractCacheTtlMinutes);
     }
 
     @Bean
@@ -76,11 +95,12 @@ public class TransactionConfiguration {
 
     @Bean
     public SpendingAnalysisAdvisor spendingAnalysisAdvisor(
+            GeminiResponsesClient geminiResponsesClient,
             ObjectMapper objectMapper,
-            @Value("${aura.ai.ollama.base-url}") String baseUrl,
-            @Value("${aura.ai.ollama.model-name}") String modelName
+            AiResponseCache aiResponseCache,
+            @Value("${aura.cache.analysis-ttl-minutes}") long analysisCacheTtlMinutes
     ) {
-        return new OllamaSpendingAnalysisAdvisor(baseUrl, modelName, objectMapper);
+        return new GeminiSpendingAnalysisAdvisor(geminiResponsesClient, objectMapper, aiResponseCache, analysisCacheTtlMinutes);
     }
 
     @Bean
@@ -98,11 +118,12 @@ public class TransactionConfiguration {
 
     @Bean
     public FinancialStrategyExplainer financialStrategyExplainer(
+            GeminiResponsesClient geminiResponsesClient,
             ObjectMapper objectMapper,
-            @Value("${aura.ai.ollama.base-url}") String baseUrl,
-            @Value("${aura.ai.ollama.model-name}") String modelName
+            AiResponseCache aiResponseCache,
+            @Value("${aura.cache.strategy-ttl-minutes}") long strategyCacheTtlMinutes
     ) {
-        return new OllamaFinancialStrategyExplainer(baseUrl, modelName, objectMapper);
+        return new GeminiFinancialStrategyExplainer(geminiResponsesClient, objectMapper, aiResponseCache, strategyCacheTtlMinutes);
     }
 
     @Bean
@@ -111,5 +132,41 @@ public class TransactionConfiguration {
             FinancialStrategyExplainer financialStrategyExplainer
     ) {
         return new ExplainFinancialStrategyService(transactionRepository, financialStrategyExplainer);
+    }
+
+    @Bean
+    public AiResponseCache aiResponseCache(
+            @Value("${aura.redis.enabled:false}") boolean redisEnabled,
+            @Value("${aura.redis.key-prefix:aura}") String keyPrefix,
+            org.springframework.beans.factory.ObjectProvider<StringRedisTemplate> stringRedisTemplateProvider
+    ) {
+        if (!redisEnabled) {
+            return new NoOpAiResponseCache();
+        }
+
+        StringRedisTemplate redisTemplate = stringRedisTemplateProvider.getIfAvailable();
+        if (redisTemplate == null) {
+            return new NoOpAiResponseCache();
+        }
+
+        return new RedisAiResponseCache(redisTemplate, keyPrefix);
+    }
+
+    @Bean
+    public RequestRateLimiter requestRateLimiter(
+            @Value("${aura.redis.enabled:false}") boolean redisEnabled,
+            @Value("${aura.redis.key-prefix:aura}") String keyPrefix,
+            org.springframework.beans.factory.ObjectProvider<StringRedisTemplate> stringRedisTemplateProvider
+    ) {
+        if (!redisEnabled) {
+            return new NoOpRequestRateLimiter();
+        }
+
+        StringRedisTemplate redisTemplate = stringRedisTemplateProvider.getIfAvailable();
+        if (redisTemplate == null) {
+            return new NoOpRequestRateLimiter();
+        }
+
+        return new RedisRequestRateLimiter(redisTemplate, keyPrefix);
     }
 }

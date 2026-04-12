@@ -12,9 +12,11 @@ public interface ConfirmExtractedTransactionsUseCase {
     List<Transaction> confirmTransactions(ConfirmExtractedTransactionsCommand command);
 
     record ConfirmExtractedTransactionsCommand(
+            java.util.UUID sessionId,
             List<ConfirmedTransaction> transactions
     ) {
         public ConfirmExtractedTransactionsCommand {
+            Objects.requireNonNull(sessionId, "sessionId must not be null");
             Objects.requireNonNull(transactions, "transactions must not be null");
 
             if (transactions.isEmpty()) {

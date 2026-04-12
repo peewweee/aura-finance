@@ -1,8 +1,11 @@
+server:
+  port: ${PORT:8080}
+
 spring:
   application:
     name: aura-finance
   datasource:
-    url: jdbc:h2:mem:auradb
+    url: jdbc:h2:file:./data/auradb;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -12,14 +15,43 @@ spring:
       path: /h2-console
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: true
     properties:
       hibernate:
         format_sql: true
+  data:
+    redis:
+      host: ${AURA_REDIS_HOST:localhost}
+      port: ${AURA_REDIS_PORT:6379}
+      timeout: 2s
 
 aura:
   ai:
-    ollama:
-      base-url: http://localhost:11434
-      model-name: llama3.2
+    gemini:
+      base-url: ${AURA_AI_GEMINI_BASE_URL:https://generativelanguage.googleapis.com}
+      api-key: ${AURA_AI_GEMINI_API_KEY:}
+      model-name: ${AURA_AI_GEMINI_MODEL_NAME:gemini-2.5-flash}
+  session:
+    retention-days: 14
+    cleanup-cron: "0 0 * * * *"
+  redis:
+    enabled: false
+    key-prefix: aura
+  rate-limit:
+    extraction:
+      requests: 20
+      window-minutes: 10
+    analysis:
+      requests: 30
+      window-minutes: 10
+    strategy:
+      requests: 20
+      window-minutes: 10
+    confirm:
+      requests: 30
+      window-minutes: 10
+  cache:
+    extract-ttl-minutes: 10
+    analysis-ttl-minutes: 15
+    strategy-ttl-minutes: 15

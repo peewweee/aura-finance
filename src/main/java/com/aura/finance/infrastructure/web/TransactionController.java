@@ -4,6 +4,8 @@ import com.aura.finance.application.port.in.CreateTransactionUseCase;
 import com.aura.finance.application.port.in.GetTransactionByIdUseCase;
 import com.aura.finance.application.port.in.ListTransactionsUseCase;
 import com.aura.finance.domain.model.Transaction;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,22 +30,31 @@ public class TransactionController {
     private final CreateTransactionUseCase createTransactionUseCase;
     private final GetTransactionByIdUseCase getTransactionByIdUseCase;
     private final ListTransactionsUseCase listTransactionsUseCase;
+    private final AnonymousSessionManager anonymousSessionManager;
 
     public TransactionController(
             CreateTransactionUseCase createTransactionUseCase,
             GetTransactionByIdUseCase getTransactionByIdUseCase,
-            ListTransactionsUseCase listTransactionsUseCase
+            ListTransactionsUseCase listTransactionsUseCase,
+            AnonymousSessionManager anonymousSessionManager
     ) {
         this.createTransactionUseCase = createTransactionUseCase;
         this.getTransactionByIdUseCase = getTransactionByIdUseCase;
         this.listTransactionsUseCase = listTransactionsUseCase;
+        this.anonymousSessionManager = anonymousSessionManager;
     }
 
     @PostMapping
-    public ResponseEntity<TransactionResponse> createTransaction(@Valid @RequestBody CreateTransactionRequest request) {
+    public ResponseEntity<TransactionResponse> createTransaction(
+            @Valid @RequestBody CreateTransactionRequest request,
+            HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse
+    ) {
+        UUID sessionId = anonymousSessionManager.resolveSessionId(httpRequest, httpResponse);
         Transaction transaction = createTransactionUseCase.createTransaction(
                 new CreateTransactionUseCase.CreateTransactionCommand(
                         null,
+                        sessionId,
                         request.description(),
                         request.amount(),
                         request.category(),
@@ -63,16 +74,25 @@ public class TransactionController {
     }
 
     @GetMapping
-    public List<TransactionResponse> listTransactions() {
-        return listTransactionsUseCase.listTransactions()
+    public List<TransactionResponse> listTransactions(
+            HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse
+    ) {
+        UUID sessionId = anonymousSessionManager.resolveSessionId(httpRequest, httpResponse);
+        return listTransactionsUseCase.listTransactions(sessionId)
                 .stream()
                 .map(this::toResponse)
                 .toList();
     }
 
     @GetMapping("/{transactionId}")
-    public ResponseEntity<TransactionResponse> getTransactionById(@PathVariable UUID transactionId) {
-        return getTransactionByIdUseCase.getTransactionById(transactionId)
+    public ResponseEntity<TransactionResponse> getTransactionById(
+            @PathVariable UUID transactionId,
+            HttpServletRequest httpRequest,
+            HttpServletResponse httpResponse
+    ) {
+        UUID sessionId = anonymousSessionManager.resolveSessionId(httpRequest, httpResponse);
+        return getTransactionByIdUseCase.getTransactionById(sessionId, transactionId)
                 .map(this::toResponse)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());

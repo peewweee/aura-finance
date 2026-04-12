@@ -19,6 +19,7 @@ public class JpaTransactionRepositoryAdapter implements TransactionRepository {
     public Transaction save(Transaction transaction) {
         TransactionJpaEntity entity = new TransactionJpaEntity(
                 transaction.id(),
+                transaction.sessionId(),
                 transaction.description(),
                 transaction.amount(),
                 transaction.category(),
@@ -30,22 +31,23 @@ public class JpaTransactionRepositoryAdapter implements TransactionRepository {
     }
 
     @Override
-    public List<Transaction> findAll() {
-        return springDataTransactionRepository.findAll()
+    public List<Transaction> findAllBySessionId(UUID sessionId) {
+        return springDataTransactionRepository.findAllBySessionId(sessionId)
                 .stream()
                 .map(this::toDomain)
                 .toList();
     }
 
     @Override
-    public Optional<Transaction> findById(UUID transactionId) {
-        return springDataTransactionRepository.findById(transactionId)
+    public Optional<Transaction> findByIdAndSessionId(UUID transactionId, UUID sessionId) {
+        return springDataTransactionRepository.findByIdAndSessionId(transactionId, sessionId)
                 .map(this::toDomain);
     }
 
     private Transaction toDomain(TransactionJpaEntity entity) {
         return new Transaction(
                 entity.getId(),
+                entity.getSessionId(),
                 entity.getDescription(),
                 entity.getAmount(),
                 entity.getCategory(),

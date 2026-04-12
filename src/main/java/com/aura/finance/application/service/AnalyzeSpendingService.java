@@ -28,7 +28,7 @@ public class AnalyzeSpendingService implements AnalyzeSpendingUseCase {
 
     @Override
     public SpendingAnalysisResult analyzeSpending(AnalyzeSpendingCommand command) {
-        List<Transaction> transactions = transactionRepository.findAll()
+        List<Transaction> transactions = transactionRepository.findAllBySessionId(command.sessionId())
                 .stream()
                 .filter(transaction -> !transaction.transactionDate().isBefore(command.startDate()))
                 .filter(transaction -> !transaction.transactionDate().isAfter(command.endDate()))

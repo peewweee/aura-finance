@@ -10,7 +10,7 @@ public interface TransactionRepository {
 
     Transaction save(Transaction transaction);
 
-    List<Transaction> findAll();
+    List<Transaction> findAllBySessionId(UUID sessionId);
 
-    Optional<Transaction> findById(UUID transactionId);
+    Optional<Transaction> findByIdAndSessionId(UUID transactionId, UUID sessionId);
 }
