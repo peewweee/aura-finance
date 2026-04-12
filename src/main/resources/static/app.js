@@ -258,11 +258,11 @@ function renderAnalysis(result) {
             </div>
         </div>
         <h3>Summary</h3>
-        <p>${escapeHtml(result.summary)}</p>
+        <p>${formatAdviceText(result.summary)}</p>
         <h4>Insights</h4>
-        <ul class="list-block">${result.insights.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        <ul class="list-block">${result.insights.map((item) => `<li>${formatAdviceText(item)}</li>`).join("")}</ul>
         <h4>Recommendations</h4>
-        <ul class="list-block">${result.recommendations.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        <ul class="list-block">${result.recommendations.map((item) => `<li>${formatAdviceText(item)}</li>`).join("")}</ul>
         <h4>Category Breakdown</h4>
         <ul class="list-block">${categoryRows || "<li>No category totals available.</li>"}</ul>
     `;
@@ -311,11 +311,11 @@ function renderStrategy(result) {
             </div>
         </div>
         <h3>Spending Insight</h3>
-        <p>${escapeHtml(result.spendingInsight)}</p>
+        <p>${formatAdviceText(result.spendingInsight)}</p>
         <h4>Caution Flags</h4>
-        <ul class="list-block">${result.cautionFlags.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+        <ul class="list-block">${result.cautionFlags.map((item) => `<li>${formatAdviceText(item)}</li>`).join("")}</ul>
         <h4>Recommendation</h4>
-        <p>${escapeHtml(result.recommendationText)}</p>
+        <p>${formatAdviceText(result.recommendationText)}</p>
         <h4>Category Breakdown</h4>
         <ul class="list-block">${categoryRows || "<li>No category totals available.</li>"}</ul>
     `;
@@ -386,6 +386,30 @@ function formatCurrency(value) {
         style: "currency",
         currency: "PHP"
     }).format(Number(value));
+}
+
+function formatAdviceText(value) {
+    return escapeHtml(normalizeMoneyText(value));
+}
+
+function normalizeMoneyText(value) {
+    const text = String(value ?? "");
+    return text
+        .replace(/([₱])\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.\d{2})?|[0-9]{4,}(?:\.\d{2})?)/g, (_, symbol, amount) => `${symbol}${formatPlainAmount(amount)}`)
+        .replace(/\b(PHP|pesos?)\s*([0-9]{1,3}(?:,[0-9]{3})*(?:\.\d{2})?|[0-9]{4,}(?:\.\d{2})?)/gi, (_, label, amount) => `${label} ${formatPlainAmount(amount)}`)
+        .replace(/\b([0-9]{4,}\.\d{2})\b/g, (_, amount) => formatPlainAmount(amount));
+}
+
+function formatPlainAmount(value) {
+    const numeric = Number(String(value).replaceAll(",", ""));
+    if (!Number.isFinite(numeric)) {
+        return value;
+    }
+
+    return new Intl.NumberFormat("en-PH", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(numeric);
 }
 
 function escapeHtml(value) {
