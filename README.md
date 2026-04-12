@@ -3,7 +3,7 @@
 Aura Finance is a web app that helps users log expenses in natural language, review extracted transactions, understand spending patterns, and get AI-assisted financial guidance.
 
 Public test web:
-- https://aura-finance.me
+- aura-finance.me
 
 ## What The App Does
 
