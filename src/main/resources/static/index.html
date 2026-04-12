@@ -6,7 +6,7 @@
     <title>Aura Finance</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Code:wght@400;500;600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
@@ -24,7 +24,7 @@
     <header class="hero">
         <div class="hero-copy">
             <p class="eyebrow">Aura</p>
-            <h1>Your money,<br>explained clearly.</h1>
+            <h1>Your money, explained clearly.</h1>
             <p class="hero-text">
                 Log expenses quickly, understand where your money goes, and make better decisions before you spend.
             </p>
@@ -32,7 +32,6 @@
     </header>
 
     <main class="dashboard-grid">
-
         <section class="panel">
             <div class="panel-header">
                 <div>
@@ -179,19 +178,20 @@
 
 <script>
 (function () {
-    const field  = document.getElementById('star-field');
-    const COUNT  = 180;
-
-    for (let i = 0; i < COUNT; i++) {
-        const star = document.createElement('div');
+    const field = document.getElementById('star-field');
+    const COLORS = ['white', 'white', 'white', '#c4b5fd', '#a5f3fc', '#fde68a'];
+    for (let i = 0; i < 180; i++) {
+        const star    = document.createElement('div');
         star.className = 'star';
         const size    = Math.random() * 2.2 + 0.4;
         const opacity = Math.random() * 0.55 + 0.15;
+        const color   = COLORS[Math.floor(Math.random() * COLORS.length)];
         star.style.cssText = [
             `width:${size}px`,
             `height:${size}px`,
             `top:${Math.random() * 100}%`,
             `left:${Math.random() * 100}%`,
+            `background:${color}`,
             `--star-opacity:${opacity.toFixed(2)}`,
             `--twinkle-dur:${(Math.random() * 4 + 2).toFixed(1)}s`,
             `--twinkle-delay:${(Math.random() * 6).toFixed(1)}s`,
@@ -202,8 +202,7 @@
     const simForm = document.getElementById('simulation-form');
     simForm && simForm.addEventListener('submit', () => {
         setTimeout(() => {
-            const vals = document.querySelectorAll('#simulation-result .metric-value');
-            vals.forEach(v => {
+            document.querySelectorAll('#simulation-result .metric-value').forEach(v => {
                 v.classList.remove('glitch-text');
                 void v.offsetWidth;
                 v.classList.add('glitch-text');
@@ -217,8 +216,6 @@
             setTimeout(() => item.classList.add('vanish'), i * 60);
         });
     });
-
-    const originalSetStatus = window.__setStatus;
 })();
 </script>
 
