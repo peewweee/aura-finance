@@ -22,6 +22,7 @@ const simulationResult = document.getElementById("simulation-result");
 const strategyForm = document.getElementById("strategy-form");
 const strategyStatus = document.getElementById("strategy-status");
 const strategyResult = document.getElementById("strategy-result");
+const statusAnimations = new WeakMap();
 document.getElementById("refresh-transactions-inline-btn").addEventListener("click", loadTransactions);
 
 extractForm.addEventListener("submit", async (event) => {
@@ -368,8 +369,37 @@ function safeJsonParse(text) {
 }
 
 function setStatus(element, message, type = "") {
-    element.textContent = message;
+    stopStatusAnimation(element);
     element.className = `status ${type}`.trim();
+
+    if (!type && typeof message === "string" && message.endsWith("...")) {
+        startStatusAnimation(element, message.slice(0, -3));
+        return;
+    }
+
+    element.textContent = message;
+}
+
+function startStatusAnimation(element, baseMessage) {
+    const dots = ["", ".", "..", "..."];
+    let frame = 0;
+
+    element.textContent = `${baseMessage}${dots[dots.length - 1]}`;
+
+    const intervalId = setInterval(() => {
+        frame = (frame + 1) % dots.length;
+        element.textContent = `${baseMessage}${dots[frame]}`;
+    }, 350);
+
+    statusAnimations.set(element, intervalId);
+}
+
+function stopStatusAnimation(element) {
+    const intervalId = statusAnimations.get(element);
+    if (intervalId) {
+        clearInterval(intervalId);
+        statusAnimations.delete(element);
+    }
 }
 
 function stripSelectionFlag(transaction) {
