@@ -9,3 +9,5 @@
 .env.*
 !.env*.example
 .env.render.example
+
+/data/*.db
